@@ -17,7 +17,7 @@ def getBoardList():
 
 def addBoardColumn(boardName, conn):
     addBoardColumn_c = conn.cursor()
-    addBoardColumn_c.execute("ALTER TABLE board_online_usr_log ADD COLUMN " + boardName.replace('-','_') + " INT DEFAULT 0;")
+    addBoardColumn_c.execute("ALTER TABLE board_online_usr_log ADD COLUMN [" + boardName.replace('-','_') + "] INT DEFAULT 0;")
     conn.commit()
 
 def addBoardData(boardName):
@@ -70,22 +70,25 @@ try:
         board_list = getBoardList()
 
         while True:
-            column_to_add = 'log_time'
-            data_to_add = 'datetime(\'now\',\'localtime\')'
-            for i in range(len(board_list)):
-                board_info = ptt_bot.get_board_info(board=board_list[i][0])
-                column_to_add += ',' + board_list[i][0].replace('-','_')
-                data_to_add += ',' + str(board_info['online_user'])
-            
-            sql_str = "INSERT INTO board_online_usr_log (" + column_to_add + ") \
-            VALUES (" + data_to_add + ")"
-            c.execute(sql_str)
-            conn.commit()
-            current_time = time.localtime()
-            if 0 <= current_time.tm_sec <= 6:
-                addNewPopularBoard(conn)
-                board_list = getBoardList()
-            time.sleep(5)
+            try:
+                column_to_add = 'log_time'
+                data_to_add = 'datetime(\'now\',\'localtime\')'
+                for i in range(len(board_list)):
+                    board_info = ptt_bot.get_board_info(board=board_list[i][0])
+                    column_to_add += ',[' + board_list[i][0].replace('-','_') + ']'
+                    data_to_add += ',' + str(board_info['online_user'])
+                
+                sql_str = "INSERT INTO board_online_usr_log (" + column_to_add + ") \
+                VALUES (" + data_to_add + ")"
+                c.execute(sql_str)
+                conn.commit()
+                current_time = time.localtime()
+                if 0 <= current_time.tm_sec <= 6:
+                    addNewPopularBoard(conn)
+                    board_list = getBoardList()
+                time.sleep(5)
+            except Exception as e:
+                print(e)
     except Exception as e:
         print(e)
     finally:
