@@ -36,7 +36,7 @@ def addNewPopularBoard(conn):
     board_list = getBoardList()
     hotpage = requests.get("https://www.ptt.cc/bbs/index.html")
     main = BeautifulSoup(hotpage.text, 'html.parser')
-    board_find = main.find_all('a', class_='board', limit=100)
+    board_find = main.find_all('a', class_='board', limit=50)
     print(':::新增以下看板:::')
     for i in range(len(board_find)):
         board_find_text = board_find[i].find('div', class_ = 'board-name').text
@@ -86,9 +86,11 @@ try:
                 if 0 <= current_time.tm_sec <= 6:
                     addNewPopularBoard(conn)
                     board_list = getBoardList()
-                time.sleep(5)
+                time.sleep(3)
             except Exception as e:
                 print(e)
+                time.sleep(5)
+                ptt_bot.login(ptt_id='{id}', ptt_pw='{pwd}', kick_other_session=True)
     except Exception as e:
         print(e)
     finally:
